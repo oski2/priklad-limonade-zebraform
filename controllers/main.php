@@ -1,5 +1,7 @@
 <?php
 
+require_once('lib/Zebra_Form.php');
+
 function page_index() {
     set('title', 'Moje záložky');
     set('bookmarks', model_get_all());
@@ -37,38 +39,47 @@ function page_search() {
 }
 
 function page_add_bookmark() {
-    $errors = array();
-    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-        $bookmark = array(
-            'url' => trim(get_post_value('url')),
-            'title' => trim(get_post_value('title'))
-        );
-        if (empty($bookmark['url'])) {
-            $errors[] = "URL nesmí být prázdné.";
+    $form = new Zebra_Form('form');
+    $form->clientside_validation(array(
+        'close_tips' =>  true,
+        'on_ready' =>  false,
+        'disable_upload_validation' => true,
+        'scroll_to_error' =>  false,
+        'tips_position' =>  'right',
+        'validate_on_the_fly' =>  true,
+        'validate_all' =>  true,
+    ));
+    
+    $form->add('label', 'label_url', 'url', 'URL');
+    $url = $form->add('text', 'url', 'http://');
+    $url->set_rule(array(
+        'required' => array('url_error', 'URL musí být vyplněno.'),
+        'url' => array(true, 'url_error', 'Pole musí obsahovat platné URL (včetně protokolu).'),
+    ));
+    
+    
+    $form->add('label', 'label_title', 'title', 'Název stránky');
+    $title = $form->add('text', 'title', '');
+    $title->set_rule(array(
+        'required' => array('title_error', 'Název musí být vyplněn.'),
+    ));
+    
+    $form->add('submit', 'submitbtn', 'Přidat');
+
+    
+    if ($form->validate()) {
+        $ok = model_add($_POST['url'], $_POST['title'], array());
+        if ($ok) {
+            flash('info', 'Záložka byla vytvořena');
+        } else {
+            flash('error', 'Záložku se nepodařilo vytvořit.');
         }
-        if (empty($bookmark['title'])) {
-            $errors[] = "Nadpis musí být vyplněn.";
-        }
-        if (count($errors) == 0) {
-            $ok = model_add($bookmark['url'], $bookmark['title']);
-            if ($ok) {
-                flash('info', 'Záložka byla vytvořena');
-            } else {
-                flash('error', 'Záložku se nepodařilo vytvořit.');
-            }
-            redirect_to('/');
-        }
-    } else {
-        $bookmark = array(
-            "url" => "http://",
-            "title" => ""
-        );
+        redirect_to('/');
     }
     
-    set('f_url', $bookmark['url']);
-    set('f_title', $bookmark['title']);
-    set('errors', $errors);
-        
+    // set('form', $form->render('views/add_form.php', true));
+    set('form', $form->render('', true));
+    
     set('title', 'Nová záložka');
     return html('add.html.php');
 }

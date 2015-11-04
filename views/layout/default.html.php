@@ -3,6 +3,7 @@
 	<head>
 		<title><?php echo htmlspecialchars($title);  ?></title>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<link rel="stylesheet" type="text/css" href="css/zebra_form.css" />
 	</head>
 <body>
 <h1><?php echo htmlspecialchars($title);  ?></h1>
@@ -19,6 +20,9 @@ if ($error != null) {
 ?>
 
 <?php echo $content;  ?>
+
+<script src="js/jquery-1.11.3.min.js"></script>
+<script src="js/zebra_form.js"></script>
 
 </body>
 </html>
