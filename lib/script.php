@@ -3,7 +3,7 @@
 
 $query = @$_POST['query'];
 
-$db = new SQLite3('database.sql',);
+$db = new SQLite3('database.sql');
 ?>
 <html>
 <head>
